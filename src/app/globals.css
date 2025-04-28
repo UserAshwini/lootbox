@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  font-size: "16px";
+}
+
+body {
+ background-color: white;
+
+}
+
+.shadow-3d {
+  box-shadow: 5px 5px;
+  transition: .3s ease-in-out;
+}
+
+.shadow-3d:hover {
+  box-shadow: 2px 2px;
+}
+
+/* Modal */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: black;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1002;
+  width: 90%;
+  max-width: 400px;
+  min-height: 200px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.loader-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.loader {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.loader::before {
+  content: '';
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 5px solid transparent;
+  border-top: 5px solid #ffffff;
+  border-bottom: 5px solid #ffffff;
+  animation: loader-spin 1.5s infinite linear;
+  position: absolute;
+}
+
+.loader::after {
+  content: '';
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  border: 5px solid transparent;
+  border-left: 5px solid #ffffff;
+  border-right: 5px solid #ffffff;
+  animation: loader-spin-reverse 2s infinite linear;
+  position: absolute;
+}
+
+@keyframes loader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-spin-reverse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
