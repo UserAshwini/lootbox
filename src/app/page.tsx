@@ -195,10 +195,16 @@ export default function Home() {
           })
         )
       );
-      const filteredLootBoxes: LootBox[] = await Promise.all(
-        lootBoxesData
-          .filter((lootboxData: any) => lootboxData.totalRemainingReward > 0n)
-          .map(async (lootboxData: any, index: number) => {
+
+      // First filter out lootboxes with no remaining rewards
+      const activeLootBoxes = lootBoxesData.filter(
+        (lootboxData: any) => lootboxData.totalRemainingReward > 0n
+      );
+
+      // Then process each active lootbox
+      const processedLootBoxes = await Promise.all(
+        activeLootBoxes.map(
+          async (lootboxData: any, index: number): Promise<LootBox | null> => {
             try {
               console.log(lootboxData.rewardToken);
               const [tokenName, tokenSymbol, tokenUri] = await Promise.all([
@@ -212,7 +218,6 @@ export default function Home() {
                   address: lootboxData.rewardToken,
                   functionName: "symbol",
                 }),
-
                 readContract(wagmiConfig, {
                   abi: LOOTBOX_TOKEN_ABI,
                   address: lootboxData.rewardToken,
@@ -224,27 +229,36 @@ export default function Home() {
               return {
                 id: index,
                 creator: lootboxData.creator,
-                rewardLowerLimit: formatEther(lootboxData.rewardLowerLimit),
-                rewardToken: lootboxData.rewardToken,
-                rewardUpperLimit: formatEther(lootboxData.rewardUpperLimit),
-                totalRemainingReward: formatEther(
-                  lootboxData.totalRemainingReward
+                rewardLowerLimit: Number(
+                  formatEther(lootboxData.rewardLowerLimit)
                 ),
-                tokenName,
-                tokenSymbol,
-                image: tokenUri,
+                rewardToken: lootboxData.rewardToken,
+                rewardUpperLimit: Number(
+                  formatEther(lootboxData.rewardUpperLimit)
+                ),
+                totalRemainingReward: Number(
+                  formatEther(lootboxData.totalRemainingReward)
+                ),
+                tokenName: String(tokenName),
+                tokenSymbol: String(tokenSymbol),
+                image: String(tokenUri),
               };
             } catch (error: any) {
               console.error("Error fetching token data:", error);
-              return null;
+              return null; // This can return null
             }
-          })
+          }
+        )
       );
-      console.log("filteredLootBoxes", filteredLootBoxes);
 
-      const updatedLootBoxes = filteredLootBoxes.filter(Boolean);
-      setLootBoxes([...updatedLootBoxes]);
+      console.log("processedLootBoxes", processedLootBoxes);
 
+      // Filter out null values and ensure type safety
+      const validLootBoxes: LootBox[] = processedLootBoxes.filter(
+        (box): box is LootBox => box !== null
+      );
+
+      setLootBoxes(validLootBoxes);
       setCurrentID(lastId);
     } catch (error) {
       console.error(error);
@@ -252,6 +266,86 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  // const getLootBoxData = async () => {
+  //   try {
+  //     setLoading(true);
+  //     let lastId = 0;
+
+  //     const lastCount: any = await readContract(wagmiConfig, {
+  //       abi: LOOTBOX_MANAGER_ABI,
+  //       address: LOOTBOX_MANAGER_ADDRESS,
+  //       functionName: "getCurrentLootBoxCount",
+  //     });
+  //     lastId = parseInt(lastCount);
+
+  //     const lootBoxesData = await Promise.all(
+  //       Array.from({ length: lastId }, (_, i) =>
+  //         readContract(wagmiConfig, {
+  //           abi: LOOTBOX_MANAGER_ABI,
+  //           address: LOOTBOX_MANAGER_ADDRESS,
+  //           functionName: "getLootBox",
+  //           args: [i],
+  //         })
+  //       )
+  //     );
+  //     const filteredLootBoxes: LootBox[] = await Promise.all(
+  //       lootBoxesData
+  //         .filter((lootboxData: any) => lootboxData.totalRemainingReward > 0n)
+  //         .map(async (lootboxData: any, index: number) => {
+  //           try {
+  //             console.log(lootboxData.rewardToken);
+  //             const [tokenName, tokenSymbol, tokenUri] = await Promise.all([
+  //               readContract(wagmiConfig, {
+  //                 abi: LOOTBOX_TOKEN_ABI,
+  //                 address: lootboxData.rewardToken,
+  //                 functionName: "name",
+  //               }),
+  //               readContract(wagmiConfig, {
+  //                 abi: LOOTBOX_TOKEN_ABI,
+  //                 address: lootboxData.rewardToken,
+  //                 functionName: "symbol",
+  //               }),
+
+  //               readContract(wagmiConfig, {
+  //                 abi: LOOTBOX_TOKEN_ABI,
+  //                 address: lootboxData.rewardToken,
+  //                 functionName: "s_tokenURI",
+  //               }),
+  //             ]);
+
+  //             console.log(tokenUri);
+  //             return {
+  //               id: index,
+  //               creator: lootboxData.creator,
+  //               rewardLowerLimit: formatEther(lootboxData.rewardLowerLimit),
+  //               rewardToken: lootboxData.rewardToken,
+  //               rewardUpperLimit: formatEther(lootboxData.rewardUpperLimit),
+  //               totalRemainingReward: formatEther(
+  //                 lootboxData.totalRemainingReward
+  //               ),
+  //               tokenName,
+  //               tokenSymbol,
+  //               image: tokenUri,
+  //             };
+  //           } catch (error: any) {
+  //             console.error("Error fetching token data:", error);
+  //             return null;
+  //           }
+  //         })
+  //     );
+  //     console.log("filteredLootBoxes", filteredLootBoxes);
+
+  //     const updatedLootBoxes = filteredLootBoxes.filter(Boolean);
+  //     setLootBoxes([...updatedLootBoxes]);
+
+  //     setCurrentID(lastId);
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleImageUrl = (fileUrl: any) => {
     console.log("Received File URL:", fileUrl);
     setFileUrl(fileUrl); // Save the URL in the state
