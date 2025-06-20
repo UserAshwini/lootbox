@@ -1,6 +1,15 @@
 import React from "react";
+interface ModalProps {
+  isOpen: boolean;
+  transactionStatus: string;
+  transactionHash?: string;
+}
 
-const Modal = ({ isOpen, transactionStatus, transactionHash }) => {
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  transactionStatus,
+  transactionHash,
+}) => {
   if (!isOpen) return null;
 
   return (
