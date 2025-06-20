@@ -33,7 +33,6 @@ import { Slider } from "@/components/ui/slider";
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import UnOpenedTab from "@/components/unopenedtab";
 import OpenedTab from "@/components/openedtab";
-import ClaimedTab from "@/components/claimedtab";
 import { toaster } from "@/components/ui/toaster";
 import { InputGroup } from "@/components/ui/input-group";
 import { LuSearch } from "react-icons/lu";
